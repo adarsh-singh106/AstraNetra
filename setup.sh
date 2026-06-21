@@ -6,6 +6,13 @@ npm install
 
 echo ""
 echo "---------------------------------------------------"
+echo "⚡ Setting file permissions..."
+echo "---------------------------------------------------"
+chmod +x index.js
+chmod +x astra
+
+echo ""
+echo "---------------------------------------------------"
 echo "⚡ Registering 'astra' command globally..."
 echo "---------------------------------------------------"
 npm link

@@ -14,6 +14,7 @@ call npm link
 echo.
 echo ---------------------------------------------------
 echo ✅ Setup Complete! 
-echo You can now open ANY terminal and type: astra
+echo You can now run: astra 
+echo (Note: If using PowerShell, type: .\astra)
 echo ---------------------------------------------------
 pause

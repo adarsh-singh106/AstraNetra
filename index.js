@@ -474,7 +474,7 @@ async function displayPersist(result) {
     }
   }
   console.log();
-  console.log(`  ${C.gray}To undo: ${C.cyan}node index.js persist --revert${C.reset}`);
+  console.log(`  ${C.gray}To undo: ${C.cyan}astra persist --revert${C.reset}`);
 }
 
 // ── SUMMARY ───────────────────────────────────────────────────────────────────
@@ -497,7 +497,7 @@ async function displaySummary(recon, scan) {
     ['SENSITIVE FLAGS', `${C.bred}${(scan?.sensitiveFlags||[]).length}${C.reset}`],
     ['DASHBOARD',       `${C.bcyan}dashboard.html${C.reset}`],
     ['EXFIL VIEWER',   `${C.bcyan}http://localhost:4444${C.reset}`],
-    ['UNDO ALL',        `${C.gray}node index.js revert --all${C.reset}`],
+    ['UNDO ALL',        `${C.gray}astra revert --all${C.reset}`],
   ];
 
   for (const [k, v] of summary) {
@@ -638,21 +638,21 @@ function printHelp() {
 ${C.bgreen}${C.bold}⚡ ASTRANETRA${C.reset} ${C.gray}— Astra (weapon) · Netra (eye)${C.reset}
 
 ${C.yellow}COMMANDS:${C.reset}
-  ${C.green}node index.js${C.reset}                   Full pipeline (all phases)
-  ${C.green}node index.js recon${C.reset}             System reconnaissance only
-  ${C.green}node index.js scan${C.reset}              File system scan only
-  ${C.green}node index.js exfil${C.reset}             Exfil to local server + DB
-  ${C.green}node index.js persist${C.reset}           Self-copy + PATH registration
-  ${C.green}node index.js persist --revert${C.reset}  Undo persistence
-  ${C.green}node index.js path${C.reset}              PATH analysis
-  ${C.green}node index.js path --demo${C.reset}       PATH hijack demo
-  ${C.green}node index.js integrity --baseline${C.reset}  SHA-256 snapshot
-  ${C.green}node index.js integrity --diff${C.reset}      Diff latest snapshots
-  ${C.green}node index.js integrity --watch${C.reset}     Real-time watch mode
-  ${C.green}node index.js crud corrupt sandbox/test.txt --demo${C.reset}
-  ${C.green}node index.js db --list${C.reset}         List stored scans
-  ${C.green}node index.js dashboard${C.reset}         Regenerate dashboard.html
-  ${C.green}node index.js revert --all${C.reset}      Undo ALL changes
+  ${C.green}astra${C.reset}                   Full pipeline (all phases)
+  ${C.green}astra recon${C.reset}             System reconnaissance only
+  ${C.green}astra scan${C.reset}              File system scan only
+  ${C.green}astra exfil${C.reset}             Exfil to local server + DB
+  ${C.green}astra persist${C.reset}           Self-copy + PATH registration
+  ${C.green}astra persist --revert${C.reset}  Undo persistence
+  ${C.green}astra path${C.reset}              PATH analysis
+  ${C.green}astra path --demo${C.reset}       PATH hijack demo
+  ${C.green}astra integrity --baseline${C.reset}  SHA-256 snapshot
+  ${C.green}astra integrity --diff${C.reset}      Diff latest snapshots
+  ${C.green}astra integrity --watch${C.reset}     Real-time watch mode
+  ${C.green}astra crud corrupt sandbox/test.txt --demo${C.reset}
+  ${C.green}astra db --list${C.reset}         List stored scans
+  ${C.green}astra dashboard${C.reset}         Regenerate dashboard.html
+  ${C.green}astra revert --all${C.reset}      Undo ALL changes
 `);
 }
 

@@ -60,6 +60,9 @@ astra                  # Linux / macOS / Command Prompt
 .\astra                # Windows PowerShell
 ```
 
+> **Note:** If `astra` isn't recognized (e.g. you skipped setup or PATH failed), you can always just use `node index.js` instead.
+> Example: `node index.js recon` is exactly the same as `astra recon`.
+
 When you're done, **undo every single change** with:
 
 ```bash

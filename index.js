@@ -118,14 +118,14 @@ async function printBanner() {
   console.clear();
   console.log();
   const art = [
-    `${C.green}${C.bold}  ░█████╗░░██████╗████████╗██████╗░░█████╗░███╗░░██╗███████╗████████╗██████╗░░█████╗░`,
-    `  ██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔══██╗████╗░██║██╔════╝╚══██╔══╝██╔══██╗██╔══██╗`,
-    `  ███████║╚█████╗░░░░██║░░░██████╔╝███████║██╔██╗██║█████╗░░░░░██║░░░██████╔╝███████║`,
-    `  ██╔══██║░╚═══██╗░░░██║░░░██╔══██╗██╔══██║██║╚████║██╔══╝░░░░░██║░░░██╔══██╗██╔══██║`,
-    `  ██║░░██║██████╔╝░░░██║░░░██║░░██║██║░░██║██║░╚███║███████╗░░░██║░░░██║░░██║██║░░██║`,
-    `  ╚═╝░░╚═╝╚═════╝░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝╚══════╝░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝${C.reset}`,
+    `${C.green}${C.bold}░█████╗░░██████╗████████╗██████╗░░█████╗░███╗░░██╗███████╗████████╗██████╗░░█████╗░`,
+    `██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔══██╗████╗░██║██╔════╝╚══██╔══╝██╔══██╗██╔══██╗`,
+    `███████║╚█████╗░░░░██║░░░██████╔╝███████║██╔██╗██║█████╗░░░░░██║░░░██████╔╝███████║`,
+    `██╔══██║░╚═══██╗░░░██║░░░██╔══██╗██╔══██║██║╚████║██╔══╝░░░░░██║░░░██╔══██╗██╔══██║`,
+    `██║░░██║██████╔╝░░░██║░░░██║░░██║██║░░██║██║░╚███║███████╗░░░██║░░░██║░░██║██║░░██║`,
+    `╚═╝░░╚═╝╚═════╝░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝╚══════╝░░░╚═╝░░░╚═╝░░╚═╝╚═╝░░╚═╝${C.reset}`,
   ];
-  for (const l of art) { console.log(l); await sleep(60); }
+  for (const l of art) { console.log(center(l)); await sleep(60); }
   console.log();
   console.log(center(`${C.gray}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${C.reset}`));
   console.log(center(`${C.bcyan}  Astra ${C.gray}(weapon)  ${C.bcyan}·  Netra ${C.gray}(eye)  ${C.bcyan}—  ${C.white}Educational Virus Behavior Simulator${C.reset}`));
@@ -636,7 +636,8 @@ async function runFullPipeline(mods) {
   console.log(`  ${C.gray}Auto-launching dashboards in default browser...${C.reset}\n`);
   try {
     await open(path.join(process.cwd(), 'dashboard.html'));
-    setTimeout(() => open('http://localhost:4444').catch(()=>{}), 1500); // Slight delay for the second tab
+    await sleep(1500);
+    await open('http://localhost:4444');
   } catch (e) {
     // Silently ignore if running headless
   }
@@ -791,14 +792,24 @@ async function main() {
   }
 
   if (command === 'dashboard') {
-    const r = await mods.runSystemRecon();
-    mods.generateDashboard({ recon: r, scan: {}, exfil: {} });
+    await printBanner();
+    await section('GENERATING DASHBOARD', '◇');
+    const r = await spinFor('Collecting metrics', 0, () => mods.runSystemRecon());
+    console.log();
+    const s = await mods.runFileScanner();
+    mods.generateDashboard({ recon: r, scan: s, exfil: {} });
+    console.log(`\n  ${C.gray}Auto-launching...${C.reset}`);
+    try { await open(path.join(process.cwd(), 'dashboard.html')); } catch(e){}
     return;
   }
 
   if (command === 'report') {
-    const r = await mods.runSystemRecon();
-    const all = { recon: r, scan: {}, exfil: {} };
+    await printBanner();
+    await section('GENERATING REPORTS', '◇');
+    const r = await spinFor('Collecting metrics', 0, () => mods.runSystemRecon());
+    console.log();
+    const s = await mods.runFileScanner();
+    const all = { recon: r, scan: s, exfil: {} };
     const fmt = args.find(a => a.startsWith('--format='))?.split('=')[1]
              || (flags.has('--format') ? args[args.indexOf('--format')+1] : 'all');
     if (fmt==='json') mods.exportJson(all);

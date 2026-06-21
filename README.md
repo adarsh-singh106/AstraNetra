@@ -135,7 +135,8 @@ Simply run the setup script for your platform. This will install dependencies an
 ### Run It!
 Now that setup is complete, you can open any terminal and run:
 ```bash
-astra
+astra         # Command Prompt, Mac, Linux
+.\astra       # Windows PowerShell
 ```
 
 When done — undo every single change ASTRANETRA made:
@@ -202,6 +203,8 @@ Web UI at `http://localhost:4444` shows every received payload. Open it in a bro
 ---
 
 ## Demo Walkthrough
+
+> **PowerShell Note:** If you are running these commands locally in Windows PowerShell, you must prefix them with `.\` (e.g., `.\astra persist`).
 
 ### Full Auto-Demo
 
@@ -277,6 +280,8 @@ astra crud corrupt sandbox/demo.txt --demo
 ---
 
 ## Full Command Reference
+
+> **PowerShell Note:** If you are running these commands locally in Windows PowerShell, you must prefix them with `.\` (e.g., `.\astra`).
 
 ```bash
 # ── FULL PIPELINE ─────────────────────────────────────────────────────────────

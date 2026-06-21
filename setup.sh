@@ -20,5 +20,6 @@ npm link
 echo ""
 echo "---------------------------------------------------"
 echo "✅ Setup Complete!"
-echo "You can now open ANY terminal and type: astra"
+echo "You can now run: astra"
+echo "(Note: If 'astra' is not found, restart your terminal or use ./astra)"
 echo "---------------------------------------------------"

@@ -102,11 +102,17 @@ async function registerInPath() {
 
   if (platform === 'win32') {
     try {
-      const current = execSync('echo %PATH%', { encoding: 'utf8' }).trim();
+      const current = process.env.PATH || '';
       if (!current.includes(injectedDir)) {
-        execSync(`setx PATH "${current};${injectedDir}"`, { encoding: 'utf8' });
-        logger.info('PersistenceEngine', 'PATH_REGISTERED_WIN32', { dir: injectedDir });
-        console.log(`\x1b[32m[PATH]\x1b[0m Registered in user PATH via setx: ${injectedDir}`);
+        const newPath = `${current};${injectedDir}`;
+        if (newPath.length > 1024) {
+          logger.warn('PersistenceEngine', 'PATH_TOO_LONG', { length: newPath.length, limit: 1024 });
+          console.log(`\x1b[33m[PATH]\x1b[0m PATH too long for setx (${newPath.length} > 1024 chars). Skipping to avoid truncation.`);
+        } else {
+          execSync(`setx PATH "${newPath}"`, { encoding: 'utf8' });
+          logger.info('PersistenceEngine', 'PATH_REGISTERED_WIN32', { dir: injectedDir });
+          console.log(`\x1b[32m[PATH]\x1b[0m Registered in user PATH via setx: ${injectedDir}`);
+        }
       } else {
         console.log(`\x1b[36m[PATH]\x1b[0m Already in PATH.`);
       }

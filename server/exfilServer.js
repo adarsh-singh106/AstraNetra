@@ -5,6 +5,10 @@ const logger = getLogger();
 let server   = null;
 const receivedPayloads = [];
 
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 const app = express();
 app.use(express.json({ limit: '50mb' }));
 
@@ -50,7 +54,7 @@ app.get('/', (req, res) => {
     : receivedPayloads.map((p, i) => `
     <div class="payload">
       <div class="ts">#${i + 1} · ${p.receivedAt} · ${p.size} bytes</div>
-      <pre>${JSON.stringify(p.data, null, 2).slice(0, 3000)}${JSON.stringify(p.data).length > 3000 ? '\n... (truncated)' : ''}</pre>
+      <pre>${escapeHtml(JSON.stringify(p.data, null, 2).slice(0, 3000))}${JSON.stringify(p.data).length > 3000 ? '\n... (truncated)' : ''}</pre>
     </div>`).join('')}
   <script>setTimeout(() => location.reload(), 5000);</script>
 </body>

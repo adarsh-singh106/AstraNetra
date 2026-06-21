@@ -20,6 +20,7 @@ db/
 
 # Trash / temp
 .astranetra_trash/
+temp/
 *.tmp
 *.temp
 

@@ -112,10 +112,16 @@ export function injectPath(dirToAdd) {
 
   if (platform === 'win32') {
     try {
-      const current = execSync('echo %PATH%', { encoding: 'utf8' }).trim();
-      execSync(`setx PATH "${current};${dirResolved}"`, { encoding: 'utf8' });
-      logger.info('PathManipulator', 'PATH_INJECTED_WIN32', { dir: dirResolved });
-      console.log(`\x1b[32m✓ Injected into Windows PATH:\x1b[0m ${dirResolved}`);
+      const current = process.env.PATH || '';
+      const newPath = `${current};${dirResolved}`;
+      if (newPath.length > 1024) {
+        logger.warn('PathManipulator', 'PATH_TOO_LONG', { length: newPath.length, limit: 1024 });
+        console.log(`\x1b[33m✗ PATH too long for setx (${newPath.length} > 1024 chars). Skipping.\x1b[0m`);
+      } else {
+        execSync(`setx PATH "${newPath}"`, { encoding: 'utf8' });
+        logger.info('PathManipulator', 'PATH_INJECTED_WIN32', { dir: dirResolved });
+        console.log(`\x1b[32m✓ Injected into Windows PATH:\x1b[0m ${dirResolved}`);
+      }
     } catch (e) {
       console.log(`\x1b[31m✗ Failed:\x1b[0m ${e.message}`);
     }

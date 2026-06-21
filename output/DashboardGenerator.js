@@ -361,7 +361,7 @@ export function generateDashboard(data) {
 </footer>
 
 <script>
-window.__ASTRANETRA_DATA__ = ${JSON.stringify(data, null, 2)};
+window.__ASTRANETRA_DATA__ = ${JSON.stringify(data, null, 2).replace(/<\//g, '<\\/')};
 
 // ── CHARTS ────────────────────────────────────────────────────────────────────
 const CHART_DEFAULTS = {

@@ -1,4 +1,16 @@
 #!/usr/bin/env node
+
+// ── Runtime version check ────────────────────────────────────────────────────
+const [__major] = process.versions.node.split('.').map(Number);
+if (__major < 18) {
+  console.error(
+    `\x1b[31m[ASTRANETRA] Node.js >= 18.0.0 is required.\x1b[0m\n` +
+    `  Current: ${process.version}\n` +
+    `  Download: https://nodejs.org/\n`
+  );
+  process.exit(1);
+}
+
 /**
  * ASTRANETRA — The Watching Weapon
  * Astra (weapon) · Netra (eye)
@@ -13,9 +25,13 @@ import crypto  from 'crypto';
 import { getLogger } from './output/Logger.js';
 const logger = getLogger(path.join(process.cwd(), 'logs'));
 
-['logs','snapshots','reports','sandbox','db','.astranetra_trash'].forEach(d =>
-  fs.mkdirSync(path.join(process.cwd(), d), { recursive: true })
-);
+for (const d of ['logs','snapshots','reports','sandbox','db','.astranetra_trash']) {
+  try {
+    fs.mkdirSync(path.join(process.cwd(), d), { recursive: true });
+  } catch (e) {
+    console.error(`\x1b[33m[WARN]\x1b[0m Could not create directory '${d}': ${e.message}`);
+  }
+}
 
 // ── Terminal helpers ──────────────────────────────────────────────────────────
 const C = {
@@ -222,7 +238,10 @@ async function displayRecon(data) {
         console.log(`    ${C.gray}→${C.reset} ${C.byellow}${e}${C.reset}`);
         await sleep(15);
       }
-      console.log(`    ${C.gray}(+${data.env.PATH.split(sep).length - 8} more entries)${C.reset}`);
+      const totalPathEntries = data.env.PATH.split(sep).length;
+      if (totalPathEntries > 8) {
+        console.log(`    ${C.gray}(+${totalPathEntries - 8} more entries)${C.reset}`);
+      }
     }
   }
 }
@@ -548,6 +567,52 @@ async function runFullPipeline(mods) {
   // 3 — READ FILES (the flashy part)
   await section('PHASE 3 — FILE ACCESS DEMONSTRATION', '⚠');
   await displayFileContents();
+
+  // 3.5 — CRUD DEMO
+  await section('PHASE 3.5 — CRUD OPERATIONS DEMO', '✎');
+  console.log();
+  console.log(`  ${C.gray}Demonstrating file manipulation inside sandbox/ — all reversible${C.reset}`);
+  console.log();
+  {
+    const demoFile = path.join(process.cwd(), 'sandbox', 'demo_target.txt');
+
+    // CREATE
+    console.log(`  ${C.bcyan}${C.bold}┌─── CREATE ───────────────────────────────────────┐${C.reset}`);
+    const cRes = await mods.createFile(demoFile, 'Hello from ASTRANETRA! Original content.\n', 'utf8', true);
+    console.log(`  ${C.bcyan}│${C.reset}  ${cRes.success ? `${C.green}✓ Created:${C.reset}` : `${C.red}✗ Failed:${C.reset}`} ${demoFile}`);
+    console.log(`  ${C.bcyan}│${C.reset}  ${C.gray}Operation: createFile()  Duration: ${cRes.durationMs}ms${C.reset}`);
+    console.log(`  ${C.bcyan}└──────────────────────────────────────────────────┘${C.reset}`);
+    await sleep(400);
+
+    // READ
+    console.log(`  ${C.bgreen}${C.bold}┌─── READ ─────────────────────────────────────────┐${C.reset}`);
+    const rRes = await mods.readFile(demoFile);
+    console.log(`  ${C.bgreen}│${C.reset}  ${rRes.success ? `${C.green}✓ Read:${C.reset}` : `${C.red}✗ Failed:${C.reset}`} ${demoFile}`);
+    if (rRes.content) console.log(`  ${C.bgreen}│${C.reset}  ${C.gray}Content: "${rRes.content.trim()}"${C.reset}`);
+    console.log(`  ${C.bgreen}│${C.reset}  ${C.gray}Operation: readFile()  Duration: ${rRes.durationMs}ms${C.reset}`);
+    console.log(`  ${C.bgreen}└──────────────────────────────────────────────────┘${C.reset}`);
+    await sleep(400);
+
+    // UPDATE
+    console.log(`  ${C.byellow}${C.bold}┌─── UPDATE ───────────────────────────────────────┐${C.reset}`);
+    const uRes = await mods.updateFile(demoFile, '\n[MODIFIED BY ASTRANETRA] Payload injected.\n', 'append');
+    console.log(`  ${C.byellow}│${C.reset}  ${uRes.success ? `${C.green}✓ Updated:${C.reset}` : `${C.red}✗ Failed:${C.reset}`} ${demoFile}`);
+    const vRes = await mods.readFile(demoFile);
+    if (vRes.content) console.log(`  ${C.byellow}│${C.reset}  ${C.gray}Content now: "${vRes.content.trim()}"${C.reset}`);
+    console.log(`  ${C.byellow}│${C.reset}  ${C.gray}Operation: updateFile(append)  Duration: ${uRes.durationMs}ms${C.reset}`);
+    console.log(`  ${C.byellow}└──────────────────────────────────────────────────┘${C.reset}`);
+    await sleep(400);
+
+    // DELETE
+    console.log(`  ${C.bred}${C.bold}┌─── DELETE ───────────────────────────────────────┐${C.reset}`);
+    const dRes = await mods.deleteFile(demoFile, false, true);
+    console.log(`  ${C.bred}│${C.reset}  ${dRes.success ? `${C.green}✓ Deleted:${C.reset}` : `${C.red}✗ Failed:${C.reset}`} ${demoFile}`);
+    if (dRes.dest) console.log(`  ${C.bred}│${C.reset}  ${C.gray}Moved to trash: ${dRes.dest}${C.reset}`);
+    console.log(`  ${C.bred}│${C.reset}  ${C.gray}Operation: deleteFile(trash)  Duration: ${dRes.durationMs}ms${C.reset}`);
+    console.log(`  ${C.bred}└──────────────────────────────────────────────────┘${C.reset}`);
+    console.log();
+    console.log(`  ${C.green}${C.bold}✓ CRUD CYCLE COMPLETE${C.reset}  ${C.gray}All 4 operations demonstrated safely in sandbox/${C.reset}`);
+  }
 
   // 4 — EXFIL
   await section('PHASE 4 — EXFILTRATION', '▶');

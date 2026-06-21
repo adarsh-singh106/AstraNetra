@@ -9,7 +9,7 @@ export default {
 
   scan: {
     roots: {
-      win32:  ['C:\\'],
+      win32:  [home],
       linux:  [home],
       darwin: [home],
     },

@@ -117,7 +117,7 @@ async function writeToDb(payload) {
       ]
     );
 
-    save(db);
+    save();
     logger.info('ExfilEngine', 'DB_WRITE_SUCCESS', { dbPath: config.exfil.dbPath });
     return { success: true, dbPath: config.exfil.dbPath };
   } catch (e) {

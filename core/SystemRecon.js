@@ -158,8 +158,8 @@ export async function runSystemRecon() {
       hostname: os.hostname(),
       homedir:  os.homedir(),
       tmpdir:   os.tmpdir(),
-      username: os.userInfo().username,
-      shell:    os.userInfo().shell || process.env.SHELL || process.env.COMSPEC || 'unknown',
+      username: (() => { try { return os.userInfo().username; } catch { return process.env.USER || process.env.USERNAME || 'unknown'; } })(),
+      shell:    (() => { try { return os.userInfo().shell || process.env.SHELL || process.env.COMSPEC || 'unknown'; } catch { return process.env.SHELL || process.env.COMSPEC || 'unknown'; } })(),
     },
     cpu: {
       model:      cpus[0]?.model || 'unknown',

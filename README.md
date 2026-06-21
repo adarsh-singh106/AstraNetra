@@ -1,10 +1,27 @@
-# ASTRANETRA
+# ⚡ ASTRANETRA
 
 > **"Astra"** (weapon) · **"Netra"** (eye) — *A watching weapon.*
 
+![Node](https://img.shields.io/badge/Node.js-%3E%3D18.0.0-brightgreen?logo=node.js)
+![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
 An educational JavaScript tool that simulates how malware operates — reconnaissance, persistence, filesystem control, and data exfiltration — entirely on your local machine. Built to understand virus behavior from the inside, using Node.js built-ins.
 
-**No actual malicious behavior. No remote transmission. No damage. Everything is reversible.**
+**⚠️ No actual malicious behavior. No remote transmission. No damage. Everything is reversible.**
+
+---
+
+## Prerequisites
+
+- **Node.js ≥ 18.0.0** — [Download here](https://nodejs.org/)
+- **npm** (bundled with Node.js)
+
+Verify your installation:
+```bash
+node --version   # Should print v18.x.x or higher
+npm --version
+```
 
 ---
 
@@ -21,14 +38,12 @@ npm install
 node index.js --help
 ```
 
-**Requires:** Node.js ≥ 18. Works on Windows, Linux, macOS.
-
 ---
 
 ## Quick Start
 
 ```bash
-# Full pipeline — recon + scan + exfil + dashboard
+# Full pipeline — recon + scan + CRUD demo + exfil + dashboard
 node index.js
 
 # Individual commands
@@ -47,6 +62,65 @@ node index.js revert --all
 
 ---
 
+## Demo Walkthrough (for Judges)
+
+### Full Auto-Demo (Recommended)
+```bash
+node index.js
+```
+This runs all phases automatically:
+1. System Reconnaissance
+2. Filesystem Mapping
+3. File Access Demonstration
+4. **CRUD Operations Demo** (Create → Read → Update → Delete)
+5. Exfiltration to localhost
+6. Report & Dashboard Generation
+
+### Manual CRUD Demo
+```bash
+node index.js crud create sandbox/test.txt "Hello World"
+node index.js crud read sandbox/test.txt
+node index.js crud update sandbox/test.txt "Modified!" --mode=append
+node index.js crud delete sandbox/test.txt
+node index.js crud corrupt sandbox/demo.txt --demo
+```
+
+### Sample Output (CRUD Phase)
+```
+──────────────────────────────────────────────────────────────────────
+  ✎  PHASE 3.5 — CRUD OPERATIONS DEMO                    14:30:15
+──────────────────────────────────────────────────────────────────────
+
+  Demonstrating file manipulation inside sandbox/ — all reversible
+
+  ┌─── CREATE ───────────────────────────────────────┐
+  │  ✓ Created: sandbox/demo_target.txt
+  │  Operation: createFile()  Duration: 3ms
+  └──────────────────────────────────────────────────┘
+
+  ┌─── READ ─────────────────────────────────────────┐
+  │  ✓ Read: sandbox/demo_target.txt
+  │  Content: "Hello from ASTRANETRA! Original content."
+  │  Operation: readFile()  Duration: 1ms
+  └──────────────────────────────────────────────────┘
+
+  ┌─── UPDATE ───────────────────────────────────────┐
+  │  ✓ Updated: sandbox/demo_target.txt
+  │  Content now: "Hello from ASTRANETRA!... Payload injected."
+  │  Operation: updateFile(append)  Duration: 4ms
+  └──────────────────────────────────────────────────┘
+
+  ┌─── DELETE ───────────────────────────────────────┐
+  │  ✓ Deleted: sandbox/demo_target.txt
+  │  Moved to trash: .astranetra_trash/demo_target.txt_1719923415
+  │  Operation: deleteFile(trash)  Duration: 2ms
+  └──────────────────────────────────────────────────┘
+
+  ✓ CRUD CYCLE COMPLETE  All 4 operations demonstrated safely in sandbox/
+```
+
+---
+
 ## What Each Feature Demonstrates
 
 | Feature | Virus Behavior It Simulates | Node.js Built-in |
@@ -61,6 +135,27 @@ node index.js revert --all
 | `crud corrupt` | File destruction / ransomware | `fs`, `crypto` |
 | `integrity` | Detecting modifications | `crypto`, `chokidar` |
 | `revert --all` | Evidence removal / clean exit | All of the above |
+
+---
+
+## Architecture
+
+```mermaid
+graph TD
+    A["index.js — CLI Orchestrator"] --> B["SystemRecon.js"]
+    A --> C["FileScanner.js"]
+    A --> D["ExfilEngine.js"]
+    A --> E["PersistenceEngine.js"]
+    A --> F["CRUDEngine.js"]
+    A --> G["IntegrityMonitor.js"]
+    A --> H["PathManipulator.js"]
+    C --> I["scanWorker.js"]
+    G --> J["hashWorker.js"]
+    D --> K["exfilServer.js"]
+    A --> L["DashboardGenerator.js"]
+    A --> M["ReportExporter.js"]
+    A --> N["Logger.js"]
+```
 
 ---
 
@@ -99,7 +194,8 @@ astranetra/
 │   ├── PersistenceEngine.js  Self-copy + PATH registration
 │   ├── ExfilEngine.js        POST to local server + SQLite
 │   ├── IntegrityMonitor.js   SHA-256 snapshots + diff
-│   └── PathManipulator.js    PATH read / demo / inject / revert
+│   ├── PathManipulator.js    PATH read / demo / inject / revert
+│   └── utils.js              Shared utility functions
 ├── server/
 │   └── exfilServer.js        Local Express server (localhost:4444)
 ├── output/
@@ -115,6 +211,17 @@ astranetra/
 ├── index.js                  CLI orchestrator — one script
 └── package.json
 ```
+
+---
+
+## How Errors Are Handled
+
+- **Startup validation:** Node.js version is checked before any module loads. Missing `node_modules` triggers a friendly error.
+- **Timeouts:** All `child_process` calls (`execSync`) use 3–8 second timeouts to prevent hangs.
+- **Graceful degradation:** Missing environment variables, inaccessible directories, and unavailable APIs fall back to safe defaults (`'unknown'`, `'N/A'`) instead of crashing.
+- **SIGINT/SIGTERM:** Graceful shutdown handlers flush logs and stop the exfil server.
+- **Sandbox enforcement:** CRUD operations are confined to `sandbox/` by default; `--force` is required to operate outside.
+- **Atomic writes:** File updates use write-to-temp-then-rename to prevent corruption.
 
 ---
 
@@ -134,12 +241,28 @@ astranetra/
 
 ---
 
+## Known Limitations
+
+- **Windows PATH length:** `setx PATH` has a 1024-character limit. If the user's PATH exceeds this, the tool skips PATH injection and logs a warning.
+- **Windows hidden files:** Hidden file detection uses dot-prefix heuristic. True Windows `FILE_ATTRIBUTE_HIDDEN` is not checked.
+- **Large drives:** Scanning the entire home directory on machines with 500K+ files may take several minutes.
+- **Dashboard offline:** The HTML dashboard loads Chart.js from a CDN. Offline viewing works but charts will not render.
+- **Docker/CI:** Some recon values (e.g., username) may show as `'unknown'` in containerized environments where `/etc/passwd` is incomplete.
+
+---
+
 ## Non-Goals
 
 - ❌ No external network calls — exfil is `localhost` only
 - ❌ No reading of sensitive file contents — paths are flagged, files are never opened
 - ❌ No process injection, keylogging, or screen capture
 - ❌ No permanent damage — every change has a documented revert
+
+---
+
+## License
+
+MIT License — Educational use only.
 
 ---
 

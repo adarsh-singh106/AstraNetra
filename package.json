@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "Astra (weapon) + Netra (eye). Educational virus-behavior simulator in Node.js.",
   "main": "index.js",
+  "bin": {
+    "astra": "index.js"
+  },
   "type": "module",
   "scripts": {
+    "postinstall": "npm link",
     "start": "node index.js",
     "recon": "node index.js recon",
     "scan": "node index.js scan",

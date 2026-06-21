@@ -20,6 +20,7 @@ import path    from 'path';
 import fs      from 'fs';
 import os      from 'os';
 import crypto  from 'crypto';
+import open    from 'open';
 
 // ── Bootstrap ────────────────────────────────────────────────────────────────
 import { getLogger } from './output/Logger.js';
@@ -630,6 +631,15 @@ async function runFullPipeline(mods) {
 
   // 6 — SUMMARY
   await displaySummary(recon, scan);
+
+  // 7 — AUTO-LAUNCH BROWSERS
+  console.log(`  ${C.gray}Auto-launching dashboards in default browser...${C.reset}\n`);
+  try {
+    await open(path.join(process.cwd(), 'dashboard.html'));
+    setTimeout(() => open('http://localhost:4444').catch(()=>{}), 1500); // Slight delay for the second tab
+  } catch (e) {
+    // Silently ignore if running headless
+  }
 }
 
 // ── HELP ──────────────────────────────────────────────────────────────────────

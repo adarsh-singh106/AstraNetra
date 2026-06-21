@@ -12,7 +12,7 @@ An educational Node.js tool that simulates how malware operates — reconnaissan
 
 > ⚠️ **No actual malicious behavior. No external network calls. No permanent damage.**
 > Everything ASTRANETRA does is printed, logged, and reversible with a single command:
-> `node index.js revert --all`
+> `astra revert --all`
 
 ---
 
@@ -108,7 +108,7 @@ An educational Node.js tool that simulates how malware operates — reconnaissan
   OS               Windows_NT 10.0.26200  TOTAL DATA      176.26 GB
   HIDDEN FILES     1,081                  SENSITIVE        12
   DASHBOARD        dashboard.html         EXFIL VIEWER    http://localhost:4444
-  UNDO ALL →       node index.js revert --all
+  UNDO ALL →       astra revert --all
 ```
 
 ---
@@ -127,9 +127,14 @@ Built for **Thunder Hackathon 3.0** under the theme *"Create a Virus in JS."* Th
 
 **Requires:** Node.js ≥ 18.0.0 · [Download](https://nodejs.org/)
 
+### Setup
+Simply run the setup script for your platform. This will install dependencies and automatically register `astra` globally.
+- **Windows:** Double-click `setup.bat` (or run `.\setup.bat` in terminal)
+- **Linux/Mac:** Run `bash setup.sh`
+
+### Run It!
+Now that setup is complete, you can open any terminal and run:
 ```bash
-cd astranetra
-npm install
 astra
 ```
 
@@ -201,7 +206,7 @@ Web UI at `http://localhost:4444` shows every received payload. Open it in a bro
 ### Full Auto-Demo
 
 ```bash
-node index.js
+astra
 ```
 
 All 5 phases run with animated terminal output. Takes 1–3 minutes depending on drive size.
@@ -210,30 +215,30 @@ All 5 phases run with animated terminal output. Takes 1–3 minutes depending on
 
 ```bash
 # Persistence — watch it register in PATH and copy to startup
-node index.js persist
+astra persist
 cat logs/persistence_state.json      # see exactly what changed
-node index.js persist --revert       # undo it
+astra persist --revert               # undo it
 
 # PATH hijack — a fake 'git' intercepts your command
-node index.js path --demo
+astra path --demo
 
 # Integrity baseline + tamper detection
-node index.js integrity --baseline ./sandbox
+astra integrity --baseline ./sandbox
 echo "tampered" >> sandbox/test.txt
-node index.js integrity --diff
+astra integrity --diff
 
 # Real-time file watch
-node index.js integrity --watch ./sandbox
+astra integrity --watch ./sandbox
 ```
 
 ### CRUD Demo
 
 ```bash
-node index.js crud create sandbox/test.txt "Hello from ASTRANETRA"
-node index.js crud read sandbox/test.txt
-node index.js crud update sandbox/test.txt " — payload injected" --mode append
-node index.js crud delete sandbox/test.txt --confirm
-node index.js crud corrupt sandbox/demo.txt --demo
+astra crud create sandbox/test.txt "Hello from ASTRANETRA"
+astra crud read sandbox/test.txt
+astra crud update sandbox/test.txt " — payload injected" --mode append
+astra crud delete sandbox/test.txt --confirm
+astra crud corrupt sandbox/demo.txt --demo
 ```
 
 **Sample output:**
@@ -439,7 +444,7 @@ dashboard.html                    ← open in browser first
 reports/report.json               ← full data, pretty-printed
 reports/report.md                 ← human-readable with tables
 reports/report.csv                ← importable into Excel / Sheets
-db/astranetra.db                  ← SQLite, queryable with: node index.js db --list
+db/astranetra.db                  ← SQLite, queryable with: astra db --list
 logs/astranetra.log.json          ← all events, machine-readable
 logs/astranetra.log.txt           ← human-readable with timestamps
 logs/crud.log.json                ← CRUD operations only
@@ -592,7 +597,7 @@ The pipeline is orchestrated by `index.js`. Each phase calls a dedicated module:
 ✅ **What ASTRANETRA is:**
 - A local educational simulation — nothing leaves your machine
 - Fully transparent — every action is printed to the terminal as it happens
-- Completely reversible — `node index.js revert --all` undoes everything
+- Completely reversible — `astra revert --all` undoes everything
 - Working cross-platform code that demonstrates real OS behaviors
 
 ❌ **What ASTRANETRA is not:**

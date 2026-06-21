@@ -8,7 +8,6 @@
   },
   "type": "module",
   "scripts": {
-    "postinstall": "npm link",
     "start": "node index.js",
     "recon": "node index.js recon",
     "scan": "node index.js scan",

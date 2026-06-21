@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Runtime data & logs
+logs/
+*.log
+*.log.json
+*.log.txt
+
+# Reports & snapshots (contain your real system data — never commit these)
+reports/
+snapshots/
+dashboard.html
+
+# Database files
+db/
+*.db
+*.sqlite
+*.sqlite3
+
+# Trash / temp
+.astranetra_trash/
+*.tmp
+*.temp
+
+# Environment & secrets
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+
+# OS generated
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build output
+dist/
+build/
+
+# Coverage
+coverage/
+.nyc_output/

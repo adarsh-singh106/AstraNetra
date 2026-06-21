@@ -1,6 +1,7 @@
 <div align="center">
 
-<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=800&size=28&duration=3000&pause=1000&color=A855F7&center=true&vCenter=true&width=600&lines=⚡+ASTRANETRA;Astra+%C2%B7+Weapon;Netra+%C2%B7+Eye;A+Watching+Weapon." alt="ASTRANETRA" />
+# ⚡ ASTRANETRA
+### Astra · Weapon | Netra · Eye | A Watching Weapon
 
 <br/>
 
@@ -41,6 +42,22 @@ The goal wasn't to build something dangerous. It was to build something that mak
 | ✅ Cross-platform working code | ❌ No permanent damage — everything reverts |
 
 ---
+
+## 📖 Educational Documentation & Live Demo
+
+ASTRANETRA isn't just a CLI tool—it's a comprehensive educational platform designed to demystify how software and malware interact with operating systems.
+
+### 🌐 Live Web Demo
+You don't have to run it locally to understand it. Visit our live web interface at **[https://astranetra.vercel.app](https://astranetra.vercel.app)** to explore the concepts, see demonstrations, and learn how ASTRANETRA simulates malware behaviors in a safe, educational environment.
+
+### 📚 Core CS Concepts (The `docs/` Folder)
+The `docs/` directory contains a deep-dive, 10-chapter educational series. It breaks down the fundamental Computer Science principles that make malware possible. Instead of just showing *what* malware does, these docs explain *how* it works at the kernel and hardware level:
+- **Foundational Concepts:** System calls, process vs. threads, and how the OS manages the filesystem (inodes, VFS).
+- **System Exploitation:** How persistence survives reboots and why the `PATH` variable is a major security vulnerability.
+- **Data Exfiltration & Security:** Hashes, network sockets, and database persistence.
+- **Runnable Experiments:** Every chapter includes small, isolated scripts to prove the concepts on your own machine.
+
+Check out the [Educational Docs README](docs/README.md) to start reading.
 
 ## Quick Start
 
